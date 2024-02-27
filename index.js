@@ -7,8 +7,8 @@ const NodeCache = require('node-cache');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize an in-memory cache with a TTL (time-to-live) of 5 minutes
-const translationCache = new NodeCache({ stdTTL: 300 });
+// Initialize an in-memory cache
+const translationCache = new NodeCache({ stdTTL: 0 });
 app.use(express.json());
 
 // Validation middleware
@@ -26,7 +26,31 @@ const handleValidationErrors = (req, res, next) => {
     next();
 };
 app.use(morgan('dev'));
-
+const documentation = {
+    route: '/translate',
+    method: 'POST',
+    description: 'Translate text from one language to another using the Google Translate API.',
+    parameters: [
+        { name: 'text', description: 'Text to be translated (required).' },
+        { name: 'toLocale', description: 'Target language code (optional, default: "fr(french)").' }
+    ],
+    example: {
+        request: {
+            text: 'Hello, how are you?',
+            toLocale: 'es'
+        },
+        response: {
+            translation: '¡Hola, cómo estás?'
+        }
+    }
+};
+// Documentation endpoint
+app.get('/', (req, res) => {
+    res.json(documentation);
+});
+app.get('/translate', (req, res) => {
+    res.json(documentation);
+});
 // Translation API endpoint
 app.post('/translate', validateRequestBody, handleValidationErrors, async (req, res) => {
     try {
